@@ -16,6 +16,7 @@ class _News_pageState extends State<News_page> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(),
       appBar: AppBar(
           title: Text(
             "Sports",
@@ -30,49 +31,51 @@ class _News_pageState extends State<News_page> {
                   size: 25,
                 )),
           ]),
-      body: FutureBuilder(
-          future: ApiManager.getSources(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Text("somthing has error"),
-              );
-            }
 
-            var sourses = snapshot.data?.sources ?? [];
-            return Column(
-              children: [
-                Container(
-                  height: 40,
-                  child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                          onTap: () {
-                            currentsource = index;
-                            setState(() {});
-                          },
-                          child: Source_item(
-                              sourses[index].name ?? "",
-                              sourses.elementAt(currentsource) ==
-                                  sourses[index]));
-                    },
-                    itemCount: sourses.length,
-                    scrollDirection: Axis.horizontal,
-                    separatorBuilder: (context, index) => SizedBox(
-                      width: 13,
+
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FutureBuilder(
+            future: ApiManager.getSources(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text("somthing has error"),
+                );
+              }
+
+              var sourses = snapshot.data?.sources ?? [];
+              return Column(
+                children: [
+                  Container(
+                    height: 40,
+                    child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                            onTap: () {
+                              currentsource = index;
+                              setState(() {});
+                            },
+                            child: Source_item(
+                                sourses[index].name ?? "",
+                                sourses.elementAt(currentsource) ==
+                                    sourses[index]));
+                      },
+                      itemCount: sourses.length,
+                      scrollDirection: Axis.horizontal,
+                      separatorBuilder: (context, index) => SizedBox(
+                        width: 13,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  height: 300,
-                  color: Colors.red,
-                )
-              ],
-            );
-          }),
+
+                ],
+              );
+            }),
+      ),
     );
   }
 }
