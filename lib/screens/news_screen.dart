@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:news/screens/newsItem.dart';
 import 'package:news/screens/source_item.dart';
 import 'package:news/shared/network/remote/apiManeger.dart';
 
@@ -50,31 +51,46 @@ class _News_pageState extends State<News_page> {
               var sourses = snapshot.data?.sources ?? [];
               return Column(
                 children: [
-                  Container(
-                    height: 40,
-                    child: ListView.separated(
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                            onTap: () {
-                              currentsource = index;
-                              setState(() {});
-                            },
-                            child: Source_item(
-                                sourses[index].name ?? "",
-                                sourses.elementAt(currentsource) ==
-                                    sourses[index]));
-                      },
-                      itemCount: sourses.length,
-                      scrollDirection: Axis.horizontal,
-                      separatorBuilder: (context, index) => SizedBox(
-                        width: 13,
-                      ),
-                    ),
-                  ),
+                  DefaultTabController(length: sourses.length,
+                      child: TabBar(
+                        onTap: (value) {
+                          currentsource=value;
+                          setState(() {
+                          });
+                        },
 
+                        isScrollable: true,
+                        indicatorColor: Colors.transparent,
+                        tabs: sourses.map((e) {
+                          return Source_item(e.name??"", sourses.indexOf(e)==currentsource);
+                        }
+                        ).toList(),
+                      )
+                  ),
+                  FutureBuilder(future: ApiManager.getNewsData(sourses[currentsource].id??""),builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text("somthing has error"),
+                      );
+                    }
+                    var articales=snapshot.data?.articles??[];
+                    return Expanded(
+                      child: ListView.builder(itemBuilder: (context, index) {
+                        return NewsItem(articales[index]);
+                      },
+                        itemCount: articales.length,
+                      ),
+                    );
+                  }
+                  ,)
                 ],
               );
-            }),
+            }
+            ),
+
       ),
     );
   }
